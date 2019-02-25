@@ -35,7 +35,7 @@ SOURCES += \
 
 
 QT += core gui
-QT += network
+#QT += network
 # Is outdated in 5.12.1  QT += webkit webkitwidgets
 QT += webenginewidgets
 

@@ -6,7 +6,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-
+    this->setWindowIcon(QIcon(":/resources/RSH-mylogo.ico"));
     //Actions in menubar
     menubarDeleteAction = ui->menubarDeleteAction;
     connect(menubarDeleteAction, SIGNAL(triggered(bool)), this, SLOT(deletePostsAction()));
