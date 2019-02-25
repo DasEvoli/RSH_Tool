@@ -41,7 +41,7 @@
         <height>0</height>
        </size>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,0,0">
+      <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,0">
        <property name="spacing">
         <number>6</number>
        </property>
@@ -214,13 +214,6 @@ height: 30px;
          </property>
          <property name="format">
           <string>%p%</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="testButton">
-         <property name="text">
-          <string>PushButton</string>
          </property>
         </widget>
        </item>
