@@ -6,7 +6,7 @@ Dieses Programm gibt euch die Möglichkeit, ein komplettes Forum zu laden und auf
 
 ## English
 
-This application is addressed to a german website [Rollenspielhimmel](https://rollenspielhimmel.de). So I will write most parts in german. Feel free to use this application and modify it. Short explanation: It fetches posts from a forum (multiple pages possible) and saves it in a textfile. Important note: this program is almost fully written in C++. GitHub thinks it is mostly written in JavaScript because a whole jQuery file is added to this project.
+This application is addressed to a german website [Rollenspielhimmel](https://rollenspielhimmel.de). So I will write most parts in german. Feel free to use this application and modify it. Short explanation: It fetches posts from a forum (multiple pages possible) and saves it in a textfile.
 
 ## Wie funktioniert das Programm?
 
