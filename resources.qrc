@@ -2,8 +2,5 @@
     <qresource prefix="/resources">
         <file>resources/eevee.gif</file>
     </qresource>
-    <qresource prefix="/">
-        <file>resources/jquery-3.3.1.slim.js</file>
-        <file>resources/RSH-mylogo.ico</file>
-    </qresource>
+    <qresource prefix="/"/>
 </RCC>

@@ -2,13 +2,11 @@
 
 RshParser::RshParser()
 {
-    // Prepare jQuery
-    QFile file;
-    file.setFileName(":/resources/jquery-3.3.1.slim.js");
-    file.open(QIODevice::ReadOnly);
-    jQuery = file.readAll();
-    jQuery.append("\nvar qt = { 'jQuery': jQuery.noConflict(true) };");
-    file.close();
+    // Prepare jQuery String from https://code.jquery.com/jquery-3.3.1.min.js
+    jQuery = QString("var jq = document.createElement('script');"
+            "jq.src = \"https://code.jquery.com/jquery-3.3.1.min.js\";"
+            "document.getElementsByTagName('head')[0].appendChild(jq);"
+            "var qt = { 'jQuery': jQuery.noConflict(true)};");
 }
 
 void RshParser::loadJQuery(QWebEnginePage* page){

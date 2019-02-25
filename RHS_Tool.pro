@@ -35,8 +35,6 @@ SOURCES += \
 
 
 QT += core gui
-#QT += network
-# Is outdated in 5.12.1  QT += webkit webkitwidgets
 QT += webenginewidgets
 
 HEADERS += \
@@ -57,4 +55,6 @@ RESOURCES += \
     resources.qrc
 
 DISTFILES +=
+
+RC_ICONS = RSH-mylogo.ico
 

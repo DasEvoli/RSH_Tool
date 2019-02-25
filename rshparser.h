@@ -20,7 +20,7 @@ public:
     QString getPostAuthorAndDate(QWebEnginePage*, int);
     QString getPostContent(QWebEnginePage*, int);
 
-    // to get the content of this website we need jQuery. So we add it manually to the website
+    // to get the content of this website we need jQuery. So we add it manually to the website from https://code.jquery.com/jquery-3.3.1.min.js
     void loadJQuery(QWebEnginePage*);
 
 signals:
