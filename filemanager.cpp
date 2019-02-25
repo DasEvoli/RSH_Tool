@@ -16,11 +16,13 @@ void FileManager::savePostsAsTextFile(QWidget *context, QList<RshPost*>* postCol
         }
         QTextStream out(&file);
         for(int i = 0; i < postCollection->size(); i++){
-           QString buffer = postCollection->at(i)->getTitle() + "\n";
-           buffer.append(postCollection->at(i)->getAuthorAndDate() + "\n");
-           buffer.append(postCollection->at(i)->getContent());
-           out << buffer;
-           out << "\n\n";
+           //QString buffer = postCollection->at(i)->getTitle() + '\n';
+           //buffer.append(postCollection->at(i)->getAuthorAndDate() + '\n');
+           //buffer.append(postCollection->at(i)->getContent());
+           out << postCollection->at(i)->getTitle() << "\r\n";
+           out << postCollection->at(i)->getAuthorAndDate() << "\r\n";
+           out << postCollection->at(i)->getContent() << "\r\n";
+           out << "\r\n";
         }
     }
 }
