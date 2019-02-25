@@ -209,6 +209,8 @@ void MainWindow::loginAction(){
     loginController->setLoginUsername(usernameLineEdit->text());
     loginController->setLoginPassword(passwordLineEdit->text());
 
+    loginStatusLabel->setText("Einloggen...");
+
     if(loginController->loginToRsh()){
         loginStatusLabel->setText("Erfolgreich eingeloggt. Hallo " + loginController->getLoginUsername() + "!");
     }
