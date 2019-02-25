@@ -13,7 +13,7 @@
 #include <QNetworkCookieJar>
 #include <QNetworkCookie>
 #include <QMessageBox>
-#include <QWebView>
+//#include <QWebView>
 
 class RshNetworkManager : public QObject
 {
@@ -29,7 +29,7 @@ public:
     void setLoggedIn(bool);
     bool loginToRsh();
 
-    void loadRshWebview(QUrl, QWebView*);
+    //void loadRshWebview(QUrl, QWebView*);
 
 private:
     QNetworkAccessManager *NAM = new QNetworkAccessManager(this);

@@ -2,4 +2,7 @@
     <qresource prefix="/resources">
         <file>resources/eevee.gif</file>
     </qresource>
+    <qresource prefix="/">
+        <file>resources/jquery-3.3.1.slim.js</file>
+    </qresource>
 </RCC>

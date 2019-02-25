@@ -62,6 +62,9 @@ MainWindow::MainWindow(QWidget *parent) :
     postLoadProgressBar = ui->postLoadProgressBar;
     connect(this, SIGNAL(progressValueChanged(int)), postLoadProgressBar, SLOT(setValue(int)));
 
+    // Load page so we can login with javascript
+    rshWEController->rshWebEnginePage->load(QUrl("https://rollenspielhimmel.de/login.do"));
+    connect(rshWEController->rshWebEnginePage, &QWebEnginePage::loadFinished, [=](){this->loginActionButton->setEnabled(true);});
 }
 
 MainWindow::~MainWindow()
@@ -70,12 +73,12 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::getPostsAction(){
+
+    deletePostsAction(); // Delete all posts before we add new ones. (deletes just by clicking the button)
     basisUrl = ui->inputUrlLineEdit->text();
 
     bool pageIsValid;
-    bool urlIsValid = checkUrl(basisUrl);
-    // TODO: put url validation in validation.h
-    if(!urlIsValid){
+    if(!Validation::rshUrl(basisUrl)){
         QMessageBox error;
         error.critical(this, "Error", "Url stimmt nicht");
         error.setFixedSize(400, 200);
@@ -88,22 +91,31 @@ void MainWindow::getPostsAction(){
     else pageIsValid = Validation::pageNumbers(firstPage, lastPage, this->layout()->widget());
 
     if(pageIsValid){
-        QWebView* webView = new QWebView();
+        RshParser *rshParser = new RshParser();
         // If the user want only one page
         if(onlyOnePageCheckBox->isChecked()){
             postLoadProgressBar->setMinimum(0);
             postLoadProgressBar->setMaximum(1);
-            rshNetworkManager->loadRshWebview(basisUrl, webView);// ÄNDERN
-            if(webView->title() == "Login - Rollenspielhimmel"){
+
+            if(!rshWEController->loadRsh(basisUrl)){
                 QMessageBox error;
-                error.critical(this, "Error", "Rollenspiel scheint privat zu sein. Um ein privates Rollenspiel runterzuladen, musst du eingeloggt sein.");
+                error.critical(this, "Error", rshWEController->getLastError());
                 error.setFixedSize(400, 200);
-                delete webView;
                 return;
             }
-            RshParser::postsfromWebViewToCollection(webView, &rshPostCollection);
+            rshParser->loadJQuery(rshWEController->rshWebEnginePage);
+
+            int postsCount = rshParser->getPostsCount(rshWEController->rshWebEnginePage);
+            // Iterate through every post on the page
+            for(int i = 0; i < postsCount; i++){
+                RshPost* newRshPost = new RshPost();
+                newRshPost->setTitle(rshParser->getPostTitle(rshWEController->rshWebEnginePage, i));
+                newRshPost->setAuthorAndDate(rshParser->getPostAuthorAndDate(rshWEController->rshWebEnginePage, i));
+                newRshPost->setContent(rshParser->getPostContent(rshWEController->rshWebEnginePage, i));
+                rshPostCollection.append(newRshPost);
+            }
+            delete rshParser;
             emit progressValueChanged(1);
-            delete webView;
         }
         else{
             QString newUrl; // to append the number of the page
@@ -112,32 +124,44 @@ void MainWindow::getPostsAction(){
 
             for(int i = firstPage; i <= lastPage; i++){
                 newUrl = basisUrl + QString::number(i);
-                rshNetworkManager->loadRshWebview(newUrl, webView);
-                RshParser::postsfromWebViewToCollection(webView, &rshPostCollection);
-                if(webView->title() == "Login - Rollenspielhimmel"){ // TODO: Should check it earlier and only one time
+                if(!rshWEController->loadRsh(newUrl)){
                     QMessageBox error;
-                    error.critical(this, "Error", "Rollenspiel scheint privat zu sein. Um ein privates Rollenspiel runterzuladen, musst du eingeloggt sein.");
+                    error.critical(this, "Error", rshWEController->getLastError());
                     error.setFixedSize(400, 200);
-                    delete webView;
                     return;
                 }
+                rshParser->loadJQuery(rshWEController->rshWebEnginePage);
+
+                int postsCount = rshParser->getPostsCount(rshWEController->rshWebEnginePage);
+                for(int i = 0; i < postsCount; i++){
+                    RshPost* newRshPost = new RshPost();
+                    newRshPost->setTitle(rshParser->getPostTitle(rshWEController->rshWebEnginePage, i));
+                    newRshPost->setAuthorAndDate(rshParser->getPostAuthorAndDate(rshWEController->rshWebEnginePage, i));
+                    newRshPost->setContent(rshParser->getPostContent(rshWEController->rshWebEnginePage, i));
+                    rshPostCollection.append(newRshPost);
+                }
+
                 emit progressValueChanged(i);
             }
-            delete webView;
+            delete rshParser;
         }
         printRshPostCollectionToScreen();
     }
 }
 
 void MainWindow::printRshPostCollectionToScreen(){
+
     foreach(RshPost *el, rshPostCollection){
         QStandardItem *SI = new QStandardItem(el->getTitle() + "\n" + el->getAuthorAndDate() + "\n" + el->getContent());
         SIlist.append(SI);
     }
-    itemModel->appendRow(SIlist);
+    foreach(QStandardItem *el, SIlist){
+        itemModel->appendRow(el);
+    }
 }
 
 void MainWindow::disableSpinBoxes(int stage){
+
     if(stage){
         firstPageSpinBox->setDisabled(true);
         lastPageSpinBox->setDisabled(true);
@@ -149,14 +173,17 @@ void MainWindow::disableSpinBoxes(int stage){
 }
 
 void MainWindow::setFirstPageValue(int value){
+
     firstPage = value;
 }
 
 void MainWindow::setLastPageValue(int value){
+
     lastPage = value;
 }
 
 void MainWindow::deletePostsAction(){
+
     qDeleteAll(SIlist.begin(), SIlist.end());
     SIlist.clear();
 
@@ -167,30 +194,25 @@ void MainWindow::deletePostsAction(){
 }
 
 void MainWindow::closeAppAction(){
+
     // More features added later probably
     QCoreApplication::quit();
 }
 
 void MainWindow::savePostsAction(){
+
     FileManager::savePostsAsTextFile(this->layout()->widget(), &rshPostCollection);
 }
 
 void MainWindow::loginAction(){
-    rshNetworkManager->setUsername(usernameLineEdit->text());
-    rshNetworkManager->setPassword(passwordLineEdit->text()); // TODO: we don't need to store password
 
-    if(rshNetworkManager->loginToRsh()){
-        loginStatusLabel->setText("Erfolgreich eingeloggt. Hallo " + rshNetworkManager->getUsername() + "!");
+    loginController->setLoginUsername(usernameLineEdit->text());
+    loginController->setLoginPassword(passwordLineEdit->text());
+
+    if(loginController->loginToRsh()){
+        loginStatusLabel->setText("Erfolgreich eingeloggt. Hallo " + loginController->getLoginUsername() + "!");
     }
-    else {
+    else{
         loginStatusLabel->setText("Login erfolglos");
-        int httpStatusCode = rshNetworkManager->getHttpStatus();
-        QMessageBox::information(this, "Error", "Login war leider nicht erfolgreich.\nErrorcode: " + QString::number(httpStatusCode));
     }
 }
-
-bool MainWindow::checkUrl(QString url){
-    QUrl qurl(url);
-    return (qurl.isValid() && qurl.authority() == "rollenspielhimmel.de");
-}
-

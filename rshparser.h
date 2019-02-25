@@ -1,24 +1,31 @@
 #ifndef RSHPARSER_H
 #define RSHPARSER_H
 
-#include <QWebView>
-#include <QWebElementCollection>
-#include <QWebPage>
-#include <QWebFrame>
+#include <QWebEnginePage>
 #include <QEventLoop>
-#include <QWebElement>
+#include <QFile>
 #include <QDebug>
-#include "rshpost.h"
-
 
 class RshParser : public QObject
 {
     Q_OBJECT
 public:
     RshParser();
-    void static postsfromWebViewToCollection(QWebView*, QList<RshPost*>*);
+    // Contains a whole jQuery file to add jQuery to every page
+    QString jQuery;
+
+    // these functions get the content of one page on rollenspielhimmel (forum)
+    int getPostsCount(QWebEnginePage*);
+    QString getPostTitle(QWebEnginePage*, int);
+    QString getPostAuthorAndDate(QWebEnginePage*, int);
+    QString getPostContent(QWebEnginePage*, int);
+
+    // to get the content of this website we need jQuery. So we add it manually to the website
+    void loadJQuery(QWebEnginePage*);
 
 signals:
+    void runJavaScriptFinished();
+public slots:
 };
 
 #endif // RSHPARSER_H

@@ -30,12 +30,14 @@ SOURCES += \
     validation.cpp \
     rshparser.cpp \
     rshpost.cpp \
-    rshnetworkmanager.cpp
+    rshwebenginecontroller.cpp \
+    logincontroller.cpp
 
 
 QT += core gui
 QT += network
-QT += webkit webkitwidgets
+# Is outdated in 5.12.1  QT += webkit webkitwidgets
+QT += webenginewidgets
 
 HEADERS += \
         mainwindow.h \
@@ -43,7 +45,8 @@ HEADERS += \
     validation.h \
     rshparser.h \
     rshpost.h \
-    rshnetworkmanager.h
+    rshwebenginecontroller.h \
+    logincontroller.h
 
 
 
@@ -52,4 +55,6 @@ FORMS += \
 
 RESOURCES += \
     resources.qrc
+
+DISTFILES +=
 

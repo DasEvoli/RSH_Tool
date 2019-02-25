@@ -1,6 +1,7 @@
 #include "validation.h"
 
 bool Validation::pageNumbers(int first, int last, QWidget *context){
+
     if(first > last){
         QMessageBox errorBox;
         errorBox.critical(context, "Error", "Erste Seitenzahl muss kleiner sein, als die letzte Seitenzahl");
@@ -14,4 +15,10 @@ bool Validation::pageNumbers(int first, int last, QWidget *context){
         return false;
     }
     return true;
+}
+
+bool Validation::rshUrl(QString url){
+
+    QUrl qurl(url);
+    return (qurl.isValid() && qurl.authority() == "rollenspielhimmel.de");
 }

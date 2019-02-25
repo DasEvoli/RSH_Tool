@@ -33,7 +33,7 @@ bool RshNetworkManager::loginToRsh()
     loop.exec();
     return loggedIn;
 }
-
+/*
 void RshNetworkManager::loadRshWebview(QUrl url, QWebView* webView)
 {
     webView->page()->setNetworkAccessManager(this->NAM); // TODO maybe we should call that when we create the webview
@@ -43,7 +43,7 @@ void RshNetworkManager::loadRshWebview(QUrl url, QWebView* webView)
     connect(webView, SIGNAL(loadFinished(bool)), &loop, SLOT(quit()));
     loop.exec();
 }
-
+*/
 void RshNetworkManager::managerFinishedLogin(QNetworkReply* replyFromManager){
      qDebug() << "managerFinishedLogin() got called";
      // TODO: add functionality to it

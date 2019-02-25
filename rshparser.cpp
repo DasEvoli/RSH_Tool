@@ -2,47 +2,95 @@
 
 RshParser::RshParser()
 {
+    // Prepare jQuery
+    QFile file;
+    file.setFileName(":/resources/jquery-3.3.1.slim.js");
+    file.open(QIODevice::ReadOnly);
+    jQuery = file.readAll();
+    jQuery.append("\nvar qt = { 'jQuery': jQuery.noConflict(true) };");
+    file.close();
 }
 
-void RshParser::postsfromWebViewToCollection(QWebView* webView, QList<RshPost*> *rshPostCollection)
+void RshParser::loadJQuery(QWebEnginePage* page){
+
+    page->runJavaScript(jQuery, [this](QVariant tmp){
+        QVariant voidTmp = tmp; // I don't know what to do with it.
+        emit runJavaScriptFinished();
+    });
+    QEventLoop loop;
+    connect(this, SIGNAL(runJavaScriptFinished()), &loop, SLOT(quit()));
+    loop.exec();
+}
+
+int RshParser::getPostsCount(QWebEnginePage* page){
+
+    int size = 0;
+    page->runJavaScript("document.getElementsByClassName(\"forum_postbody_content\").length", [this,&size](const QVariant &count) mutable {
+        size = count.toInt();
+        emit runJavaScriptFinished();
+    });
+    QEventLoop loop;
+    connect(this, SIGNAL(runJavaScriptFinished()), &loop, SLOT(quit()));
+    loop.exec();
+    return size;
+}
+
+QString RshParser::getPostTitle(QWebEnginePage* page, int index)
 {
-    QWebElementCollection postbody = webView->page()->mainFrame()->findAllElements("div.forum_postbody_content");
+    QString titleValue;
+    page->runJavaScript("qt.jQuery(\".forum_postbody_content:eq(" + QString::number(index) + ")\").find(\"H2\").text()", [this, &titleValue](const QVariant &value) mutable {
+        titleValue = value.toString().simplified();
+        emit runJavaScriptFinished();
+    });
+    QEventLoop loop;
+    connect(this, SIGNAL(runJavaScriptFinished()), &loop, SLOT(quit()));
+    loop.exec();
+    return titleValue;
+}
 
-    foreach(QWebElement el, postbody){
-        RshPost* newRshPost = new RshPost();
+QString RshParser::getPostAuthorAndDate(QWebEnginePage* page, int index)
+{
+    QString authorValue;
+    page->runJavaScript("qt.jQuery(\".forum_postbody_content:eq(" + QString::number(index) + ")\").find(\".forum_postbody_small\").text()", [this, &authorValue](const QVariant &value) mutable {
+        authorValue = value.toString().simplified();
+        emit runJavaScriptFinished();
+    });
+    QEventLoop loop;
+    connect(this, SIGNAL(runJavaScriptFinished()), &loop, SLOT(quit()));
+    loop.exec();
+    return authorValue;
+}
 
-        // Gets title of Post
-        QString title;
-        title = el.findFirst("h2").toPlainText();
-        newRshPost->setTitle(title);
+QString RshParser::getPostContent(QWebEnginePage* page, int index)
+{
+    QString contentValue;
 
-        // Gets author and time (with regex could it be splitted)
-        QString authorAndTime;
-        authorAndTime = el.findFirst("span.forum_postbody_small").toPlainText();
-        newRshPost->setAuthorAndDate(authorAndTime);
+    // FOR ALL P TAGS
+    page->runJavaScript("qt.jQuery(\".forum_postbody_content:eq(" + QString::number(index) + ")\").find(\"p\").text()", [this, &contentValue](const QVariant &value) mutable {
+        contentValue = value.toString().simplified();
+        emit runJavaScriptFinished();
+    });
+    QEventLoop loopP;
+    connect(this, SIGNAL(runJavaScriptFinished()), &loopP, SLOT(quit()));
+    loopP.exec();
 
-        // Gets content of post with <p>
-        QString stringForP;
-        QWebElementCollection pCollection = el.findAll("p");
-        foreach(QWebElement el, pCollection){
-            stringForP.append(el.toPlainText());
-        }
-        stringForP = stringForP.simplified(); // Calling simplified so it doesnt apply format of user
-        // Is empty for some user. Instead divs contain the content
-        // TODO: Check what happens if they post something without writing something
-        if(stringForP.isEmpty()){
-            QString stringForDivs;
-            QWebElementCollection divsCollection = el.findAll("div");
-            for(int i = 0; i < divsCollection.count(); i++){
-                if(i != (divsCollection.count() -1)) stringForDivs += divsCollection.at(i).toPlainText() + "\n";
-                else stringForDivs += divsCollection.at(i).toPlainText();
-            }
-            newRshPost->setContent(stringForDivs.simplified());
-        }
-        else {
-          newRshPost->setContent(stringForP);
-        }
-        // Important that it is still in the loop. Or else empty content could be added
-        rshPostCollection->append(newRshPost);
-    }
+    // FOR ALL DIV CONTAINERS
+    page->runJavaScript("qt.jQuery(\".forum_postbody_content:eq(" + QString::number(index) + ")\").find(\"div\").text()", [this, &contentValue](const QVariant &value) mutable {
+        contentValue += value.toString().simplified();
+        emit runJavaScriptFinished();
+    });
+    QEventLoop loopDiv;
+    connect(this, SIGNAL(runJavaScriptFinished()), &loopDiv, SLOT(quit()));
+    loopDiv.exec();
+
+    // FOR ALL CENTER TAGS (yea this site generates a center outsite of a p tag)
+    page->runJavaScript("qt.jQuery(\".forum_postbody_content:eq(" + QString::number(index) + ")\").find(\"center\").text()", [this, &contentValue](const QVariant &value) mutable {
+        contentValue += value.toString().simplified();
+        emit runJavaScriptFinished();
+    });
+    QEventLoop loopCenter;
+    connect(this, SIGNAL(runJavaScriptFinished()), &loopCenter, SLOT(quit()));
+    loopCenter.exec();
+
+    return contentValue;
 }

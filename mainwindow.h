@@ -4,9 +4,6 @@
 #include <QMainWindow>
 #include <QPushButton>
 #include <QString>
-#include <QWebView>
-#include <QtWebKit>
-#include <QtWebKitWidgets/QWebFrame>
 #include <QListWidget>
 #include <QSpinBox>
 #include <QCheckBox>
@@ -20,12 +17,10 @@
 #include <QtAlgorithms>
 #include "validation.h"
 #include "filemanager.h"
+#include "rshwebenginecontroller.h"
 #include "rshpost.h"
 #include "rshparser.h"
-#include "rshnetworkmanager.h"
-
-
-// TODO: Änder alles in die collection. Löschen, speichern usw.
+#include "logincontroller.h"
 
 namespace Ui {
 class MainWindow;
@@ -36,10 +31,11 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
 private:
+
     // ui objects
     Ui::MainWindow *ui;
     QLineEdit *inputUrlLineEdit;
@@ -60,6 +56,7 @@ private:
     QProgressBar *postLoadProgressBar;
 
     // Posts get stored in this list
+    // We could make a class for this collection to add some functions to it like delete, edit etc...
     QList<RshPost*> rshPostCollection;
 
     // To Display posts on screen
@@ -72,11 +69,14 @@ private:
     int lastPage = 2;
 
     // Other class instances
-    RshNetworkManager *rshNetworkManager = new RshNetworkManager(this);
+    // Holds the webengine and all cookies with it to stay logged in
+    RshWebEngineController *rshWEController = new RshWebEngineController(this);
+    // to login to rollenspielhimmel.de (webenginepage needs to be argument so it can set the responsed cookies)
+    LoginController *loginController = new LoginController(rshWEController->rshWebEnginePage);
 
     // Private methods
+    // prints all posts in the rshPostCollection to the SIlist and from that to the itemModel
     void printRshPostCollectionToScreen();
-    bool checkUrl(QString);
 
 signals:
     void progressValueChanged(int);
