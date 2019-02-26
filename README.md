@@ -37,8 +37,8 @@ Auf dieser GitHub Seite, könnt ihr unter "Releases" die neueste Version als Setu
 ### Requirements
 
 * Qt 5.12.1 (Probably works with a lower version.) Important: Needs to support QWebEngine
-* Microsoft Visual C++ Compiler 15.0 (MinGW does not work because of QWebEngine)
 * Windows 10 (Not tested on different systems yet)
+* Microsoft Visual C++ Redistributable (x86)
 
 ### Installation
 
